@@ -1,14 +1,30 @@
 class SessionsController < ApplicationController
 
-    before_action :logged_in?
+    before_action :require_logged_in, only: [:destroy] 
+    before_action :require_logged_out, only: [:new, :create]
 
     def new 
         @user=User.new
         render :new
     end
 
-    def destroy 
-        
+    def create
+        email = params[:user][:email]
+        password = params[:user][:password]
+
+        @user = User.find_by_credentials(email, password)
+        if @user 
+            login(@user)
+            redirect_to user_url(@user)
+        else  
+            render :new
+        end
     end
+
+    def destroy 
+        logout!
+        redirect_to new_session_url
+    end
+
 
 end
